@@ -1,8 +1,6 @@
 import axios from "axios";
 
 export default async function handler(req, res) {
-  console.log("func start");
-
   const { code, state } = req.query;
 
   if (!code) {
