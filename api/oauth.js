@@ -52,7 +52,7 @@ export default async function handler(req, res) {
           type: "authorization_response",
           token: "${accessToken}"
         },
-        window.location.origin
+        "*"
       );
       window.close();
     </script>
