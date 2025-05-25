@@ -7,14 +7,14 @@ const REDIRECT_URI =
 const ALLOWED_USER = process.env.ALLOWED_GITHUB_USER;
 
 export default async function handler(req, res) {
-  const { provider, scope, code, state } = req.query;
+  const { provider, code, state } = req.query;
 
   if (provider === "github" && !code) {
     const authUrl =
       "https://github.com/login/oauth/authorize" +
       `?client_id=${CLIENT_ID}` +
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-      `&scope=${encodeURIComponent(scope)}`;
+      `&scope=repo`;
     return res.redirect(authUrl);
   }
 
