@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       window.opener.postMessage(
         {
           type: "authorization_response",
-          token: "${accessToken}"
+          data: { token: "{{token}}" }
         },
         "*"
       );
