@@ -7,6 +7,7 @@ const REDIRECT_URI =
 const ALLOWED_USER = process.env.ALLOWED_GITHUB_USER;
 
 export default async function handler(req, res) {
+  console.log("OAuth callback hit, query:", req.query);
   const { provider, code, state } = req.query;
 
   if (provider === "github" && !code) {
@@ -33,6 +34,7 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: "Token exchange failed" });
       }
 
+      console.log("Token from GitHub:", accessToken);
       const userResponse = await axios.get("https://api.github.com/user", {
         headers: { Authorization: `token ${accessToken}` },
       });
@@ -54,7 +56,7 @@ export default async function handler(req, res) {
       window.opener.postMessage(
         {
           type: "authorization_response",
-          data: { token: "{{token}}" }
+          data: { token: "${accessToken}" }
         },
         "*"
       );
