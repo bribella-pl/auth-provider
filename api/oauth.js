@@ -7,7 +7,6 @@ const REDIRECT_URI =
 const ALLOWED_USER = process.env.ALLOWED_GITHUB_USER;
 
 export default async function handler(req, res) {
-  console.log("OAuth callback hit, query:", req.query);
   const { provider, code, state } = req.query;
 
   if (provider === "github" && !code) {
@@ -16,8 +15,6 @@ export default async function handler(req, res) {
       `?client_id=${CLIENT_ID}` +
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
       `&scope=repo`;
-
-    console.log("Redirecting to:", authUrl);
     return res.redirect(authUrl);
   }
 
@@ -30,7 +27,6 @@ export default async function handler(req, res) {
       );
       const accessToken = tokenResponse.data.access_token;
       if (!accessToken) {
-        console.warn("Token exchange failed", tokenResponse);
         return res.status(401).json({ error: "Token exchange failed" });
       }
 
@@ -41,7 +37,6 @@ export default async function handler(req, res) {
 
       const login = userResponse.data.login;
       if (login !== ALLOWED_USER) {
-        console.warn("User not allowed", userResponse);
         return res
           .status(403)
           .send(`<p>Unauthorized: ${login} is not allowed</p>`);
@@ -66,14 +61,11 @@ export default async function handler(req, res) {
   </body>
 </html>`);
     } catch (err) {
-      console.warn("400", err);
-
       return res
         .status(500)
         .json({ error: "OAuth exchange failed", details: err.message });
     }
   } else {
-    console.warn("400", res);
     return res
       .status(400)
       .json({ error: "Missing code or unsupported provider" });
