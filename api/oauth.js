@@ -16,8 +16,6 @@ export default async function handler(req, res) {
       `?client_id=${CLIENT_ID}` +
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
       `&scope=repo`;
-
-    console.log("Redirecting to:", authUrl);
     return res.redirect(authUrl);
   }
 
@@ -30,50 +28,33 @@ export default async function handler(req, res) {
       );
       const accessToken = tokenResponse.data.access_token;
       if (!accessToken) {
-        console.warn("Token exchange failed", tokenResponse);
         return res.status(401).json({ error: "Token exchange failed" });
       }
 
-      console.log("Token from GitHub:", accessToken);
       const userResponse = await axios.get("https://api.github.com/user", {
         headers: { Authorization: `token ${accessToken}` },
       });
 
       const login = userResponse.data.login;
       if (login !== ALLOWED_USER) {
-        console.warn("User not allowed", userResponse);
         return res
           .status(403)
           .send(`<p>Unauthorized: ${login} is not allowed</p>`);
       }
 
-      return res.status(200).setHeader("Content-Type", "text/html")
-        .send(`<!DOCTYPE html>
-<html>
-  <head><meta charset="utf-8"><title>Authorize Complete</title></head>
-  <body>
-    <script>
-      window.opener.postMessage(
-        {
-          type: "authorization_response",
-          data: { token: "${accessToken}" }
-        },
-        "*"
-      );
-      window.close();
-    </script>
-    <p>Logowanie zakończone. Możesz zamknąć to okno.</p>
-  </body>
-</html>`);
+      return res
+        .status(302)
+        .setHeader(
+          "Location",
+          `https://bribella-pl.github.io/bribella-react/admin?token=${accessToken}`
+        )
+        .end();
     } catch (err) {
-      console.warn("400", err);
-
       return res
         .status(500)
         .json({ error: "OAuth exchange failed", details: err.message });
     }
   } else {
-    console.warn("400", res);
     return res
       .status(400)
       .json({ error: "Missing code or unsupported provider" });
